@@ -1,5 +1,5 @@
 import CrudeOil
+import NaturalGas
 
-
-crude_instance = CrudeOil.CrudeOil()
-crude_instance.crude_import_by_country()
+natgas_instance = NaturalGas.NaturalGas()
+natgas_instance.all_data_chart()
