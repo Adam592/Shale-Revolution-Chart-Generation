@@ -65,3 +65,36 @@ class CrudeOil:
 
         # Save the chart
         plt.savefig("../Figs/fig1.png")
+
+    @staticmethod
+    def crude_export_data():
+
+        sns.set_style("darkgrid")
+        plt.figure(figsize=(10, 8))
+
+        # Prepare data for chart generation
+        crude_export = pd.read_csv("../Data/U.S._Exports_of_Crude_oil.csv", skiprows=4)
+        crude_export.columns = ["Year", "Amount"]
+        crude_export = crude_export[crude_export["Year"].isin(range(1973, 2022))]
+
+        # Generate the chart
+        ax = sns.lineplot(
+            data=crude_export,
+            x="Year",
+            y="Amount",
+            marker="o",
+            linestyle="dashed",
+        )
+
+        # Label the chart
+        plt.xlabel("Rok", size=16)
+        plt.ylabel("Tysiąc baryłek ropy dziennie", size=16)
+        plt.title("Eksport ropy naftowej w USA", size=18)
+
+        # Set x ticks
+        years = list(range(1973, 2023, 7))
+        plt.xticks(size=12)
+        ax.set_xticks(years)
+
+        # Save the chart
+        plt.savefig("../Figs/fig2.png")
