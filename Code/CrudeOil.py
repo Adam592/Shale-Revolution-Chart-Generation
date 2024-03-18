@@ -98,3 +98,99 @@ class CrudeOil:
 
         # Save the chart
         plt.savefig("../Figs/fig2.png")
+
+    @staticmethod
+    def crude_import_by_country():
+
+        plt.rcParams.update({"font.size": 12})
+        colors = ["#ff9999", "#66b3ff", "#99ff99", "#ffcc99", "#c2a1ff", "#a1fff4"]
+
+        # Import dataset
+        crude_import_by_country = pd.read_csv(
+            "../Data/U.S._Imports_by_Country_of_Origin.csv", skiprows=6
+        )
+
+        # Display only country names as column names
+        country_names = crude_import_by_country.iloc[0][1:].index
+        country_names_series = pd.Series(country_names)
+        extracted_countries = country_names_series.str.extract(
+            r"U.S. Imports from ([^,]+) of Crude Oil Mbbl/d"
+        )
+        cleaned_countries = extracted_countries.fillna(country_names_series)
+        cleaned_countries_series = cleaned_countries[0]
+        new_columns = ["Year"] + cleaned_countries_series.tolist()
+        crude_import_by_country.columns = new_columns
+
+        # Calculate total imports in a given year
+        excluded_column = ["Year"]
+        crude_import_by_country["Total"] = crude_import_by_country.loc[
+            :, ~crude_import_by_country.columns.isin(excluded_column)
+        ].sum(axis=1)
+
+        # Select data only from 1973, 2005, 2022 and fill all NaN with 0
+        crude_import_by_country = crude_import_by_country[
+            crude_import_by_country["Year"].isin([1973, 2005, 2022])
+        ]
+        crude_import_by_country = crude_import_by_country.fillna(0)
+
+        # Method for preparing top5 countries with biggest export values and categorizing the rest as 'Other'
+        def prepare_data(row_data):
+            sorted_data = row_data.sort_values(ascending=False)
+            top_5_data = sorted_data[:5]
+            other_category_sum = sorted_data[5:].sum()
+            result_data = top_5_data.append(
+                pd.Series(other_category_sum, index=["Other"])
+            )
+            return result_data.index, result_data.values
+
+        # Selecting desired data rows from dataset
+        row_data_2022 = crude_import_by_country.loc[
+            1, ~crude_import_by_country.columns.isin(["Year", "Total"])
+        ]
+        row_data_2005 = crude_import_by_country.loc[
+            18, ~crude_import_by_country.columns.isin(["Year", "Total"])
+        ]
+        row_data_1973 = crude_import_by_country.loc[
+            50, ~crude_import_by_country.columns.isin(["Year", "Total"])
+        ]
+
+        # Parsing the rows through prepare_data method
+        labels2022, sizes2022 = prepare_data(row_data_2022)
+        labels2005, sizes2005 = prepare_data(row_data_2005)
+        labels1973, sizes1973 = prepare_data(row_data_1973)
+
+        # Creating three pie charts side by side
+        fig, axs = plt.subplots(1, 3, figsize=(18, 8))
+
+        axs[0].pie(
+            sizes2022,
+            labels=labels2022,
+            autopct="%1.1f%%",
+            colors=colors,
+            startangle=90,
+        )
+        axs[0].set_title("2022")
+
+        axs[1].pie(
+            sizes2005,
+            labels=labels2005,
+            autopct="%1.1f%%",
+            colors=colors,
+            startangle=90,
+        )
+        axs[1].set_title("2005")
+
+        axs[2].pie(
+            sizes1973,
+            labels=labels1973,
+            autopct="%1.1f%%",
+            colors=colors,
+            startangle=90,
+        )
+        axs[2].set_title("1973")
+
+        plt.subplots_adjust(wspace=0.5)
+        plt.tight_layout()
+
+        # Save the chart
+        plt.savefig("../Figs/fig3.png")
