@@ -70,3 +70,63 @@ class NaturalGas:
         ax.set_xticks(years)
 
         plt.savefig("../Figs/fig4.png")
+
+    @staticmethod
+    def natgas_export_data():
+
+        plt.figure(figsize=(15, 8))
+        colors = ["blue", "orange", "red"]
+
+        natgas_export_all = pd.read_csv(
+            "../Data/U.S._Natural_Gas_Exports_and_Re-Exports_by_Country.csv", skiprows=6
+        )
+        natgas_export_all.columns = [
+            "Year",
+            "LNG Export",
+            "Pipeline Export",
+            "Total Export",
+        ]
+
+        lng_export = natgas_export_all[["Year", "LNG Export"]]
+        lng_export.columns = ["Year", "Amount"]
+
+        pipeline_export = natgas_export_all[["Year", "Pipeline Export"]]
+        pipeline_export.columns = ["Year", "Amount"]
+
+        total_export = natgas_export_all[["Year", "Total Export"]]
+        total_export.columns = ["Year", "Amount"]
+
+        lng_export = lng_export[lng_export["Year"].isin(range(1973, 2022))]
+        pipeline_export = pipeline_export[
+            pipeline_export["Year"].isin(range(1973, 2022))
+        ]
+        total_export = total_export[total_export["Year"].isin(range(1973, 2022))]
+
+        total_export["Typ Eksportu"] = "Eksport Całkowity"
+        pipeline_export["Typ Eksportu"] = "Eksport Gazociągiem"
+        lng_export["Typ Eksportu"] = "Eksport LNG"
+
+        all_data = pd.concat([total_export, lng_export, pipeline_export])
+        all_data["Amount"] = all_data["Amount"].values / 1000
+
+        all_data = all_data.reset_index(drop=True)
+
+        ax = sns.lineplot(
+            data=all_data,
+            x="Year",
+            y="Amount",
+            hue="Typ Eksportu",
+            marker="o",
+            linestyle="dashed",
+            palette=colors,
+        )
+
+        plt.xlabel("Rok", size=16)
+        plt.ylabel("Eksport w miliardach stóp sześciennych rocznie", size=16)
+        plt.title("Eksport gazu ziemnego w USA z podziałem na gazociągi i LNG", size=18)
+
+        years = list(range(1973, 2023, 7))
+        plt.xticks(size=12)
+        ax.set_xticks(years)
+
+        plt.savefig("../Figs/fig5.png")
