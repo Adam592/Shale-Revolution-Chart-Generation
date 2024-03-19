@@ -130,3 +130,57 @@ class NaturalGas:
         ax.set_xticks(years)
 
         plt.savefig("../Figs/fig5.png")
+
+    @staticmethod
+    def lng_export_data():
+
+        colors = [
+            "#e6194B",
+            "#f58231",
+            "#ffe119",
+            "#3cb44b",
+            "#42d4f4",
+            "#4363d8",
+            "#911eb4",
+            "#fabebe",
+            "#469990",
+        ]
+        plt.rcParams.update({"font.size": 12})
+        plt.figure(figsize=(15, 8))
+
+        lng_export = pd.read_csv("../Data/U.S._LNG_Exports_by_Country.csv", skiprows=6)
+        lng_export = lng_export.fillna(0)
+
+        country_names = lng_export.iloc[0][1:].index
+        country_names_series = pd.Series(country_names)
+        extracted_countries = country_names_series.str.extract(
+            r"[U.S. Liquefied|Liquefied U.S.] Natural Gas Exports by Vessel[s]? to ([^,]+) MMcf"
+        )
+        cleaned_countries = extracted_countries.fillna(country_names_series)
+        cleaned_countries_series = cleaned_countries[0]
+        new_columns = ["Year"] + cleaned_countries_series.tolist()
+        lng_export.columns = new_columns
+
+        excluded_column = ["Year"]
+        lng_export["Total"] = lng_export.loc[
+            :, ~lng_export.columns.isin(excluded_column)
+        ].sum(axis=1)
+
+        def prepare_data(row_data):
+            sorted_data = row_data.sort_values(ascending=False)
+            top_8_data = sorted_data[:8]
+            other_category_sum = sorted_data[8:].sum()
+            result_data = top_8_data.append(
+                pd.Series(other_category_sum, index=["Other"])
+            )
+            return result_data.index, result_data.values
+
+        excluded = ["Year", "Total"]
+        row_data = lng_export.loc[1, ~lng_export.columns.isin(excluded)]
+        labels, sizes = prepare_data(row_data)
+
+        plt.pie(sizes, labels=labels, autopct="%1.1f%%", colors=colors, startangle=90)
+        plt.title("2022")
+
+        plt.savefig("../Figs/fig6.png")
+    
