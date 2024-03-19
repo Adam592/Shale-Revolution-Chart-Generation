@@ -183,4 +183,73 @@ class NaturalGas:
         plt.title("2022")
 
         plt.savefig("../Figs/fig6.png")
-    
+
+    @staticmethod
+    def natgas_consumption_by_sector():
+        sns.set_style("darkgrid")
+        plt.figure(figsize=(15, 8))
+        colors = ["blue", "orange", "red", "yellow", "black"]
+
+        natgas_residential = pd.read_csv(
+            "../Data/U.S._Natural_Gas_Residential_Consumption.csv", skiprows=4
+        )
+        natgas_commercial = pd.read_csv(
+            "../Data/Natural_Gas_Deliveries_to_Commercial_Consumers_(Including_Vehicle_Fuel_through_1996)_in_the_U.S..csv",
+            skiprows=4,
+        )
+        natgas_industrial = pd.read_csv(
+            "../Data/U.S._Natural_Gas_Industrial_Consumption.csv", skiprows=4
+        )
+        natgas_vehicle = pd.read_csv(
+            "../Data/U.S._Natural_Gas_Vehicle_Fuel_Consumption.csv", skiprows=4
+        )
+        natgas_electric = pd.read_csv(
+            "../Data/U.S._Natural_Gas_Deliveries_to_Electric_Power_Consumers.csv",
+            skiprows=4,
+        )
+
+        natgas_residential.columns = ["Year", "Amount"]
+        natgas_commercial.columns = ["Year", "Amount"]
+        natgas_industrial.columns = ["Year", "Amount"]
+        natgas_vehicle.columns = ["Year", "Amount"]
+        natgas_electric.columns = ["Year", "Amount"]
+
+        natgas_residential["Rodzaj Konsumpcji"] = "Mieszkaniowe"
+        natgas_commercial["Rodzaj Konsumpcji"] = "Komercyjne"
+        natgas_industrial["Rodzaj Konsumpcji"] = "Industrialne"
+        natgas_vehicle["Rodzaj Konsumpcji"] = "Transport"
+        natgas_electric["Rodzaj Konsumpcji"] = "Energia Elektryczna"
+
+        natgas_residential["Amount"] = natgas_residential["Amount"] / 1000
+        natgas_commercial["Amount"] = natgas_commercial["Amount"] / 1000
+        natgas_industrial["Amount"] = natgas_industrial["Amount"] / 1000
+        natgas_vehicle["Amount"] = natgas_vehicle["Amount"] / 1000
+        natgas_electric["Amount"] = natgas_electric["Amount"] / 1000
+
+        all_data = pd.concat(
+            [
+                natgas_residential,
+                natgas_commercial,
+                natgas_industrial,
+                natgas_vehicle,
+                natgas_electric,
+            ]
+        )
+
+        ax = sns.lineplot(
+            data=all_data,
+            x="Year",
+            y="Amount",
+            hue="Rodzaj Konsumpcji",
+            marker="o",
+            linestyle="dashed",
+            palette=colors,
+        )
+
+        plt.xlabel("Rok", size=16)
+        plt.ylabel("Miliard stóp sześciennych rocznie", size=16)
+        plt.title(
+            "Konsumpcja gazu ziemnego w USA z podziałem na rodzaj odbiorcy", size=18
+        )
+
+        plt.savefig("../Figs/fig7.png")
